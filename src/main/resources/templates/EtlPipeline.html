@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETL Pipeline | Enerlytics</title>
+    <!-- Favicon -->
+	<link rel="icon" type="image/x-icon" th:href="@{/images/logo.ico}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/DashboardStyle.css}">
+    <link rel="stylesheet" th:href="@{/css/EtlPipelineStyle.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('etl')}"></aside>
+    <div class="main-area">
+        <header th:replace="~{fragments/topbar :: topbar('ETL Pipeline')}"></header>
+        <main class="main-content etl-page">
+            <section class="page-header">
+                <div>
+                    <div class="eyebrow">DATA PROCESSING</div>
+                    <h1>ETL Pipeline</h1>
+                    <p>Inspect data validation, imports and processing history.</p>
+                </div>
+                <span class="header-indicator"><i class="bi bi-diagram-3"></i> Pipeline Monitoring</span>
+            </section>
+
+            <section class="etl-summary" aria-label="Pipeline statistics">
+                <article class="stat-card">
+                    <div class="card-top"><span>Import Jobs</span><i class="bi bi-stack"></i></div>
+                    <div class="stat-value" th:text="${totalJobs}">0</div>
+                    <div class="stat-description">All recorded executions</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Completed Jobs</span><i class="bi bi-check-circle"></i></div>
+                    <div class="stat-value" th:text="${completedJobs}">0</div>
+                    <div class="stat-description">Successful imports</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Imported Measurements</span><i class="bi bi-database-add"></i></div>
+                    <div class="stat-value" th:text="${#numbers.formatInteger(importedRows, 0, 'COMMA')}">0</div>
+                    <div class="stat-description">Records from completed jobs</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Skipped Measurements</span><i class="bi bi-shield-exclamation"></i></div>
+                    <div class="stat-value" th:text="${#numbers.formatInteger(skippedRows, 0, 'COMMA')}">0</div>
+                    <div class="stat-description">Rejected by completed imports</div>
+                </article>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div><h2>Processing Workflow</h2><p>The stages used when importing a dataset.</p></div>
+                    <span class="panel-tag">Extract · Transform · Load</span>
+                </div>
+                <div class="etl-steps">
+                    <div class="etl-step">
+                        <div class="step-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                        <div class="step-title">01 · Extract</div>
+                        <p>Read the semicolon-separated TXT or CSV source and validate its column header.</p>
+                    </div>
+                    <div class="etl-step">
+                        <div class="step-icon"><i class="bi bi-funnel"></i></div>
+                        <div class="step-title">02 · Transform</div>
+                        <p>Parse timestamps and numeric fields; exclude records that fail validation.</p>
+                    </div>
+                    <div class="etl-step">
+                        <div class="step-icon"><i class="bi bi-database-check"></i></div>
+                        <div class="step-title">03 · Load</div>
+                        <p>Insert accepted measurements into SQLite in batches and register their dataset.</p>
+                    </div>
+                </div>
+                <div class="etl-callout">
+                    <i class="bi bi-info-circle"></i>
+                    <span>This page displays the recorded pipeline history, not live progress through each stage.</span>
+                </div>
+            </section>
+
+            <section class="etl-lower">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div><h2>Recent Import Jobs</h2><p>Up to 30 latest recorded jobs.</p></div>
+                        <a class="etl-action" th:href="@{/datasets}"><i class="bi bi-upload"></i> Import Dataset</a>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Job</th><th>File</th><th>Dataset</th><th>Status</th>
+                                <th>Rows read</th><th>Imported</th><th>Skipped</th><th>Started</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="job : ${recentJobs}">
+                                <td th:text="${'#' + job.id}">#1</td>
+                                <td class="etl-file" th:text="${job.fileName}">file.csv</td>
+                                <td th:text="${job.dataset == null ? '—' : job.dataset.name}">Dataset</td>
+                                <td><span class="etl-status"
+                                          th:classappend="${job.status == null ? 'is-unknown' : 'is-' + #strings.toLowerCase(job.status.name())}"
+                                          th:text="${job.status == null ? 'UNKNOWN' : job.status.name()}">COMPLETED</span></td>
+                                <td th:text="${job.totalRows == null ? '—' : #numbers.formatInteger(job.totalRows,0,'COMMA')}">0</td>
+                                <td th:text="${job.importedRows == null ? '—' : #numbers.formatInteger(job.importedRows,0,'COMMA')}">0</td>
+                                <td th:text="${job.skippedRows == null ? '—' : #numbers.formatInteger(job.skippedRows,0,'COMMA')}">0</td>
+                                <td th:text="${job.startedAt == null ? '—' : #temporals.format(job.startedAt,'dd MMM yyyy HH:mm')}">Date</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recentJobs)}">
+                                <td colspan="8" class="empty-table">No import jobs recorded yet.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+                <article class="panel etl-health">
+                    <div class="panel-heading">
+                        <div><h2>Pipeline Health</h2><p>Recorded job statuses</p></div>
+                        <i class="bi bi-activity panel-icon"></i>
+                    </div>
+                    <div class="health-row">
+                        <span>Completed</span><strong th:text="${completedJobs}">0</strong>
+                    </div>
+                    <div class="health-row">
+                        <span>Failed</span><strong th:text="${failedJobs}">0</strong>
+                    </div>
+                    <div class="health-row">
+                        <span>Processing</span><strong th:text="${processingJobs}">0</strong>
+                    </div>
+                    <p class="health-note">“Processing” reflects the stored job status and does not confirm a currently running process.</p>
+                    <a class="etl-action secondary" th:href="@{/datasets}"><i class="bi bi-folder2-open"></i> Browse Datasets</a>
+                </article>
+            </section>
+
+            <section class="panel etl-errors" th:if="${failedJobs > 0}">
+                <div class="panel-heading">
+                    <div><h2>Failures &amp; Diagnostics</h2><p>Recorded error messages for failed jobs.</p></div>
+                    <i class="bi bi-exclamation-triangle panel-icon"></i>
+                </div>
+                <div th:each="job : ${recentJobs}" th:if="${job.status != null and job.status.name() == 'FAILED'}"
+                     class="failure-row">
+                    <strong th:text="${'#' + job.id + ' · ' + job.fileName}">Failed import</strong>
+                    <p th:text="${#strings.isEmpty(job.errorMessage) ? 'No error details recorded.' : job.errorMessage}"></p>
+                </div>
+                <p class="health-note">Displaying failure details from the 30 most recent jobs.</p>
+            </section>
+        </main>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body>
+</html>

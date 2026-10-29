@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Datasets | Enerlytics</title>
+    <!-- Favicon -->
+	<link rel="icon" type="image/x-icon" th:href="@{/images/logo.ico}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/DashboardStyle.css}">
+    <link rel="stylesheet" th:href="@{/css/DatasetsStyle.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('datasets')}"></aside>
+    <div class="main-area">
+        <header th:replace="~{fragments/topbar :: topbar('Datasets')}"></header>
+        <main class="main-content">
+
+            <section class="page-header">
+                <div>
+                    <div class="eyebrow">DATA MANAGEMENT</div>
+                    <h1>Datasets</h1>
+                    <p>Explore registered sources, measurement counts and import history.</p>
+                </div>
+                <span class="header-indicator"><i class="bi bi-database-check"></i> Local data catalog</span>
+            </section>
+
+            <div class="import-alert success" th:if="${importSuccess}" th:text="${importSuccess}"></div>
+            <div class="import-alert error" th:if="${importError}" th:text="${importError}"></div>
+
+            <section class="panel upload-panel">
+                <div class="panel-heading"><div>
+                    <h2>Import Dataset</h2>
+                    <p>Upload a UCI-format semicolon-separated TXT or CSV file.</p>
+                </div><span class="panel-tag">TXT / CSV</span></div>
+                <form class="upload-form" method="post" th:action="@{/datasets/import}" enctype="multipart/form-data">
+                    <label>Dataset name
+                        <input name="datasetName" type="text" required maxlength="150" placeholder="e.g. Household 2011">
+                    </label>
+                    <label>Source file
+                        <input name="file" type="file" accept=".txt,.csv" required>
+                    </label>
+                    <button type="submit" class="upload-submit"><i class="bi bi-cloud-arrow-up"></i> Import Dataset</button>
+                </form>
+                <p class="upload-help">Requires the original 9-column header and semicolon delimiters. Invalid measurement rows are skipped.
+                A failed import rolls back all database changes. Maximum upload: 250 MB.</p>
+            </section>
+
+            <section class="datasets-stats" aria-label="Dataset statistics">
+                <article class="stat-card">
+                    <div class="card-top"><span>Registered Datasets</span><i class="bi bi-database"></i></div>
+                    <div class="stat-value" th:text="${totalDatasets}">0</div>
+                    <div class="stat-description">Available data sources</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Registered Measurements</span><i class="bi bi-activity"></i></div>
+                    <div class="stat-value" th:text="${#numbers.formatInteger(totalRegisteredRows, 0, 'COMMA')}">0</div>
+                    <div class="stat-description">Based on dataset record counts</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Completed Imports</span><i class="bi bi-check-circle"></i></div>
+                    <div class="stat-value" th:text="${completedJobs}">0</div>
+                    <div class="stat-description">Successful import jobs</div>
+                </article>
+                <article class="stat-card">
+                    <div class="card-top"><span>Failed Imports</span><i class="bi bi-exclamation-circle"></i></div>
+                    <div class="stat-value" th:text="${failedJobs}">0</div>
+                    <div class="stat-description">Jobs requiring attention</div>
+                </article>
+            </section>
+
+            <section class="datasets-grid">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div><h2>Available Datasets</h2><p>Select a dataset to view its details.</p></div>
+                        <span class="panel-tag">SQLite</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Dataset</th><th>File</th><th>Records</th><th>Explore</th></tr></thead>
+                            <tbody>
+                                <tr th:each="dataset : ${datasets}"
+                                    th:classappend="${selectedDatasetId != null and dataset.id == selectedDatasetId} ? 'selected-dataset' : ''">
+                                    <td class="dataset-name" th:text="${dataset.name}">Dataset</td>
+                                    <td class="file-name" th:text="${dataset.sourceFileName}">file.txt</td>
+                                    <td th:text="${dataset.recordCount == null ? '—' : #numbers.formatInteger(dataset.recordCount, 0, 'COMMA')}">0</td>
+                                    <td>
+                                        <a class="table-link" th:href="@{/datasets(datasetId=${dataset.id})}">
+                                            Details <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(datasets)}">
+                                    <td colspan="4" class="empty-table">No datasets have been imported yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="panel details-panel">
+                    <div class="panel-heading">
+                        <div><h2>Dataset Details</h2><p>Selected data source</p></div>
+                        <i class="bi bi-info-circle panel-icon"></i>
+                    </div>
+                    <div th:if="${selectedDataset != null}">
+                        <div class="dataset-logo"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+                        <h3 class="details-title" th:text="${selectedDataset.name}">Energy dataset</h3>
+                        <p class="details-description"
+                           th:text="${#strings.isEmpty(selectedDataset.description) ? 'No description available.' : selectedDataset.description}"></p>
+                        <dl class="details-list">
+                            <div><dt>Dataset ID</dt><dd th:text="${selectedDataset.id}"></dd></div>
+                            <div><dt>Source file</dt><dd th:text="${selectedDataset.sourceFileName}"></dd></div>
+                            <div><dt>Measurements</dt>
+                                 <dd th:text="${selectedDataset.recordCount == null ? '—' : #numbers.formatInteger(selectedDataset.recordCount, 0, 'COMMA')}"></dd></div>
+                            <div><dt>Registered</dt>
+                                 <dd th:text="${selectedDataset.createdAt == null ? '—' : #temporals.format(selectedDataset.createdAt, 'dd MMM yyyy, HH:mm')}"></dd></div>
+                        </dl>
+                        <a class="primary-link"
+                           th:href="@{/analytics(datasetId=${selectedDataset.id})}">
+                            <i class="bi bi-graph-up-arrow"></i> Analyze Dataset
+                        </a>
+                    </div>
+                    <div th:if="${selectedDataset == null}" class="empty-details">
+                        <i class="bi bi-database-slash"></i>
+                        <p>Import a dataset to see its details here.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel import-history">
+                <div class="panel-heading">
+                    <div><h2>Import History</h2><p>Recent ETL jobs and their outcomes.</p></div>
+                    <span class="panel-tag" th:text="${totalJobs + ' jobs'}">0 jobs</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Job</th><th>Source file</th><th>Status</th><th>Total rows</th><th>Imported</th><th>Skipped</th><th>Started</th></tr></thead>
+                        <tbody>
+                            <tr th:each="job : ${importJobs}">
+                                <td th:text="${'#' + job.id}">#1</td>
+                                <td class="file-name" th:text="${job.fileName}">file.txt</td>
+                                <td><span class="status-pill"
+                                    th:classappend="${job.status == null ? 'status-unknown' : 'status-' + #strings.toLowerCase(job.status.name())}"
+                                    th:text="${job.status == null ? 'UNKNOWN' : job.status}">COMPLETED</span></td>
+                                <td th:text="${job.totalRows == null ? '—' : #numbers.formatInteger(job.totalRows, 0, 'COMMA')}"></td>
+                                <td th:text="${job.importedRows == null ? '—' : #numbers.formatInteger(job.importedRows, 0, 'COMMA')}"></td>
+                                <td th:text="${job.skippedRows == null ? '—' : #numbers.formatInteger(job.skippedRows, 0, 'COMMA')}"></td>
+                                <td th:text="${job.startedAt == null ? '—' : #temporals.format(job.startedAt, 'dd MMM yyyy, HH:mm')}"></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(importJobs)}"><td class="empty-table" colspan="7">No import jobs have been recorded.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="history-note"><i class="bi bi-shield-check"></i> Uploads are enabled. Deletion and retry actions are not enabled yet.</p>
+            </section>
+
+        </main>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body>
+</html>

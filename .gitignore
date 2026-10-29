@@ -1,0 +1,44 @@
+# Maven build artifacts
+/target/
+**/target/
+
+# Local database and SQLite sidecar files
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+
+# Large source and generated ETL data (keep .gitkeep)
+/src/main/resources/data/*
+!/src/main/resources/data/.gitkeep
+/household_power_consumption.txt
+/household_power_cleaned.csv
+/household_power_rejected.csv
+
+# Java IDE files
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+.sts4-cache/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS, logs and temporary files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.zip
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example

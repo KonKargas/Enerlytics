@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="topbar" th:fragment="topbar(pageTitle)">
+
+            <div class="breadcrumb">
+                <span>Workspace</span>
+                <i class="bi bi-chevron-right"></i>
+                <strong th:text="${pageTitle}">Dashboard</strong>
+            </div>
+
+            <div class="topbar-right">
+                <span class="workspace-badge">
+                    <i class="bi bi-hdd-stack"></i>
+                    Local Workspace
+                </span>
+
+                <div class="app-avatar">
+                    E
+                </div>
+            </div>
+
+        </header>
+</body>
+</html>

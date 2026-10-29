@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Enerlytics</title>
+    <!-- Favicon -->
+	<link rel="icon" type="image/x-icon" th:href="@{/images/logo.ico}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/DashboardStyle.css}">
+    <link rel="stylesheet" th:href="@{/css/SettingsStyle.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('settings')}"></aside>
+    <div class="main-area">
+        <header th:replace="~{fragments/topbar :: topbar('Settings')}"></header>
+        <main class="main-content">
+            <section class="page-header">
+                <div>
+                    <div class="eyebrow">PREFERENCES</div>
+                    <h1>Settings</h1>
+                    <p>Choose your default analytics view and review application information.</p>
+                </div>
+                <span class="header-indicator"><i class="bi bi-gear"></i> Workspace Settings</span>
+            </section>
+
+            <div class="settings-layout">
+                <section class="panel settings-panel">
+                    <div class="panel-heading">
+                        <div><h2>Analytics Defaults</h2><p>Applied when opening the Analytics page.</p></div>
+                        <i class="bi bi-sliders panel-icon"></i>
+                    </div>
+                    <form id="settingsForm" autocomplete="off">
+                        <div class="settings-fields">
+                            <label for="defaultAggregation">
+                                <span>Default Aggregation</span>
+                                <select id="defaultAggregation" name="defaultAggregation">
+                                    <option value="SUM">SUM — total consumption</option>
+                                    <option value="AVG">AVG — average per measurement</option>
+                                </select>
+                            </label>
+                            <label for="defaultGrouping">
+                                <span>Default Grouping</span>
+                                <select id="defaultGrouping" name="defaultGrouping">
+                                    <option value="MONTH">Month</option>
+                                    <option value="SEASON">Season</option>
+                                    <option value="DAY_OF_WEEK">Day of week</option>
+                                    <option value="DAY_PERIOD">Day period</option>
+                                </select>
+                            </label>
+                        </div>
+                        <p class="settings-help">Preferences are saved in this browser only. They do not alter datasets or the SQLite database.</p>
+                        <div class="settings-actions">
+                            <button type="submit" class="settings-primary"><i class="bi bi-check2-circle"></i> Save Preferences</button>
+                            <button type="button" id="resetSettings" class="settings-secondary"><i class="bi bi-arrow-counterclockwise"></i> Restore Defaults</button>
+                        </div>
+                        <p class="settings-feedback" id="settingsFeedback" role="status" aria-live="polite"></p>
+                    </form>
+                </section>
+
+                <section class="panel settings-panel">
+                    <div class="panel-heading">
+                        <div><h2>Application Information</h2><p>Current environment details</p></div>
+                        <i class="bi bi-info-circle panel-icon"></i>
+                    </div>
+                    <dl class="settings-info">
+                        <div><dt>Application</dt><dd th:text="${applicationName}">Enerlytics</dd></div>
+                        <div><dt>Version</dt><dd>1.0</dd></div>
+                        <div><dt>Backend</dt><dd>Spring Boot</dd></div>
+                        <div><dt>Database Engine</dt><dd th:text="${databaseEngine}">SQLite</dd></div>
+                        <div><dt>Storage</dt><dd th:text="${dataStorage}">Local database</dd></div>
+                        <div><dt>Analytics</dt><dd>SUM / AVG</dd></div>
+                    </dl>
+                    <div class="settings-note"><i class="bi bi-shield-lock"></i>
+                        <span>Database reset, deletion and backup restoration are intentionally not available from this page.</span>
+                    </div>
+                </section>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+<script th:src="@{/js/settings.js}"></script>
+</body>
+</html>

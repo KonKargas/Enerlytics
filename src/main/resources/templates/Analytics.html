@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | Enerlytics</title>
+    <!-- Favicon -->
+	<link rel="icon" type="image/x-icon" th:href="@{/images/logo.ico}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/DashboardStyle.css}">
+    <link rel="stylesheet" th:href="@{/css/AnalyticsStyle.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('analytics')}"></aside>
+    <div class="main-area">
+        <header th:replace="~{fragments/topbar :: topbar('Analytics')}"></header>
+        <main class="main-content">
+            <section class="page-header">
+                <div>
+                    <div class="eyebrow">DEEP ANALYSIS</div>
+                    <h1>Energy Analytics</h1>
+                    <p>Compare consumption by time period, appliance group and aggregation method.</p>
+                </div>
+                <div class="header-indicator"><i class="bi bi-graph-up-arrow"></i> Historical measurements</div>
+            </section>
+
+            <section class="panel analytics-filter-panel" aria-label="Analytics filters">
+                <div class="panel-heading"><div><h2>Analysis Parameters</h2><p>Choose a dataset and aggregation options.</p></div><span class="panel-tag">SQL Analytics</span></div>
+                <div class="analytics-filters">
+                    <label>Dataset
+                        <select id="datasetSelect" th:disabled="${#lists.isEmpty(datasets)}">
+                            <option th:each="dataset : ${datasets}" th:value="${dataset.id}"
+                                    th:selected="${dataset.id == selectedDatasetId}" th:text="${dataset.name}"></option>
+                        </select>
+                    </label>
+                    <label>Aggregation
+                        <select id="aggregationSelect"><option value="SUM">SUM</option><option value="AVG">AVG</option></select>
+                    </label>
+                    <label>Group by
+                        <select id="groupingSelect">
+                            <option value="MONTH">Month</option><option value="SEASON">Season</option>
+                            <option value="DAY_OF_WEEK">Day of week</option><option value="DAY_PERIOD">Day period</option>
+                        </select>
+                    </label>
+                    <label>Date From
+                        <input type="date" id="dateFrom" aria-label="Date From">
+                    </label>
+                    <label>Date To
+                        <input type="date" id="dateTo" aria-label="Date To">
+                    </label>
+                    <button id="resetDates" type="button" class="analytics-reset-button">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset dates
+                    </button>
+                </div>
+            </section>
+
+            <div id="analyticsStatus" class="analytics-status" role="status" aria-live="polite"></div>
+            <section class="analytics-summary" aria-label="Consumption summary">
+                <article class="stat-card"><div class="card-top"><span>Kitchen</span><i class="bi bi-cup-hot"></i></div><div class="stat-value" id="kitchenValue">—</div><div class="stat-description" id="kitchenUnit">Loading...</div></article>
+                <article class="stat-card"><div class="card-top"><span>Laundry</span><i class="bi bi-water"></i></div><div class="stat-value" id="laundryValue">—</div><div class="stat-description" id="laundryUnit">Loading...</div></article>
+                <article class="stat-card"><div class="card-top"><span>Heating</span><i class="bi bi-thermometer-half"></i></div><div class="stat-value" id="heatingValue">—</div><div class="stat-description" id="heatingUnit">Loading...</div></article>
+                <article class="stat-card"><div class="card-top"><span>Measurements</span><i class="bi bi-database"></i></div><div class="stat-value" id="countValue">—</div><div class="stat-description">Included in the selected dataset</div></article>
+            </section>
+
+            <section class="analytics-charts">
+                <article class="panel analytics-main-chart">
+                    <div class="panel-heading"><div><h2>Consumption by Period</h2><p>Kitchen, laundry and heating compared across periods.</p></div><span class="panel-tag" id="chartUnit">kWh</span></div>
+                    <div class="analytics-chart-wrap"><canvas id="analyticsBarChart" aria-label="Consumption bar chart" role="img"></canvas></div>
+                </article>
+                <article class="panel analytics-share-chart">
+                    <div class="panel-heading"><div><h2>Consumption Breakdown</h2><p>Relative share of each sub-meter.</p></div></div>
+                    <div class="analytics-doughnut-wrap"><canvas id="analyticsDoughnutChart" aria-label="Consumption breakdown chart" role="img"></canvas></div>
+                    <p class="analytics-note">Shares are calculated from summed Wh across all valid readings, regardless of the selected SUM/AVG display.</p>
+                </article>
+            </section>
+
+            <section class="panel analytics-table-panel">
+                <div class="panel-heading"><div><h2>Detailed Results</h2><p id="resultsSubtitle">Values grouped by month.</p></div><span class="panel-tag">Database Results</span></div>
+                <div class="table-wrapper"><table>
+                    <thead><tr><th>Period</th><th>Records</th><th id="kitchenHeading">Kitchen (kWh)</th><th id="laundryHeading">Laundry (kWh)</th><th id="heatingHeading">Heating (kWh)</th></tr></thead>
+                    <tbody id="analyticsTableBody"><tr><td colspan="5" class="empty-table">Loading results...</td></tr></tbody>
+                </table></div>
+            </section>
+        </main>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+<script th:inline="javascript">
+    window.enerlyticsAnalytics = {
+        apiUrl: /*[[@{/api/analytics}]]*/ '/api/analytics'
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/analytics.js}"></script>
+</body>
+</html>

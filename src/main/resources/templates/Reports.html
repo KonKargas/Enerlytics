@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | Enerlytics</title>
+    <!-- Favicon -->
+	<link rel="icon" type="image/x-icon" th:href="@{/images/logo.ico}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/DashboardStyle.css}">
+    <link rel="stylesheet" th:href="@{/css/ReportsStyle.css}">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('reports')}"></aside>
+    <div class="main-area">
+        <header th:replace="~{fragments/topbar :: topbar('Reports')}"></header>
+        <main class="main-content reports-page">
+            <section class="page-header no-print">
+                <div>
+                    <div class="eyebrow">ENERGY REPORTING</div>
+                    <h1>Reports &amp; Export</h1>
+                    <p>Generate aggregated energy reports from your imported datasets.</p>
+                </div>
+                <span class="header-indicator"><i class="bi bi-file-earmark-bar-graph"></i> Reporting workspace</span>
+            </section>
+
+            <section class="panel report-filters no-print">
+                <div class="panel-heading">
+                    <div><h2>Report Parameters</h2><p>Choose your dataset, calculation and date range.</p></div>
+                    <span class="panel-tag">SQL Aggregation</span>
+                </div>
+                <form class="reports-form" method="get" th:action="@{/reports}">
+                    <label>Dataset
+                        <select name="datasetId" required th:disabled="${#lists.isEmpty(datasets)}">
+                            <option th:each="dataset : ${datasets}" th:value="${dataset.id}"
+                                    th:selected="${selectedDataset != null and dataset.id == selectedDataset.id}"
+                                    th:text="${dataset.name}">Dataset</option>
+                        </select>
+                    </label>
+                    <label>Aggregation
+                        <select name="type">
+                            <option value="SUM" th:selected="${type.name() == 'SUM'}">SUM</option>
+                            <option value="AVG" th:selected="${type.name() == 'AVG'}">AVG</option>
+                        </select>
+                    </label>
+                    <label>Group by
+                        <select name="grouping">
+                            <option value="MONTH" th:selected="${grouping.name() == 'MONTH'}">Month</option>
+                            <option value="SEASON" th:selected="${grouping.name() == 'SEASON'}">Season</option>
+                            <option value="DAY_OF_WEEK" th:selected="${grouping.name() == 'DAY_OF_WEEK'}">Day of week</option>
+                            <option value="DAY_PERIOD" th:selected="${grouping.name() == 'DAY_PERIOD'}">Day period</option>
+                        </select>
+                    </label>
+                    <label>Date From
+                        <input type="date" name="dateFrom" th:value="${dateFrom}">
+                    </label>
+                    <label>Date To
+                        <input type="date" name="dateTo" th:value="${dateTo}">
+                    </label>
+                    <button type="submit" class="report-button" th:disabled="${#lists.isEmpty(datasets)}">
+                        <i class="bi bi-arrow-repeat"></i> Generate Report
+                    </button>
+                </form>
+                <p class="report-hint">Leave dates empty to analyze the complete dataset. Both endpoints include the final date.</p>
+            </section>
+
+            <section class="panel report-document" aria-label="Energy report preview">
+                <div class="report-document-heading">
+                    <div>
+                        <div class="eyebrow">ENERLYTICS / ENERGY REPORT</div>
+                        <h2>Consumption Summary</h2>
+                        <p th:text="${selectedDataset == null ? 'No dataset selected' : selectedDataset.name}">Dataset</p>
+                    </div>
+                    <div class="report-actions no-print" th:if="${selectedDataset != null}">
+                        <a class="report-button outline" th:href="@{/reports/export.csv(datasetId=${selectedDataset.id},grouping=${grouping},type=${type},dateFrom=${dateFrom},dateTo=${dateTo})}">
+                            <i class="bi bi-filetype-csv"></i> Export CSV
+                        </a>
+                        <button type="button" class="report-button" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print / Save PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-meta" th:if="${selectedDataset != null}">
+                    <span><strong>Dataset:</strong> <span th:text="${selectedDataset.id}"></span></span>
+                    <span><strong>Aggregation:</strong> <span th:text="${type}"></span></span>
+                    <span><strong>Grouping:</strong> <span th:text="${grouping}"></span></span>
+                    <span><strong>Dates:</strong> <span th:text="${dateFrom == null ? 'Start' : dateFrom}"></span> – <span th:text="${dateTo == null ? 'End' : dateTo}"></span></span>
+                </div>
+
+                <div class="report-empty" th:if="${selectedDataset == null}">No datasets available. Import one from the Datasets page.</div>
+                <div th:if="${selectedDataset != null}">
+                    <div class="report-cards">
+                        <article><span>Kitchen</span><strong th:text="${#numbers.formatDecimal(kitchenTotal, 1, 3)}">0</strong><small th:text="${unit}">kWh</small></article>
+                        <article><span>Laundry</span><strong th:text="${#numbers.formatDecimal(laundryTotal, 1, 3)}">0</strong><small th:text="${unit}">kWh</small></article>
+                        <article><span>Heating</span><strong th:text="${#numbers.formatDecimal(heatingTotal, 1, 3)}">0</strong><small th:text="${unit}">kWh</small></article>
+                        <article><span>Measurements</span><strong th:text="${#numbers.formatInteger(measurements, 0, 'COMMA')}">0</strong><small>Valid readings</small></article>
+                    </div>
+                    <div class="report-table-title"><h3>Detailed Breakdown</h3><span th:text="${unit}">kWh</span></div>
+                    <div class="table-wrapper">
+                        <table class="report-table">
+                            <thead><tr><th>Period</th><th>Measurements</th><th>Kitchen</th><th>Laundry</th><th>Heating</th></tr></thead>
+                            <tbody>
+                                <tr th:each="row : ${results}">
+                                    <td th:text="${row.period}">January</td>
+                                    <td th:text="${#numbers.formatInteger(row.measurementCount, 0, 'COMMA')}">0</td>
+                                    <td th:text="${#numbers.formatDecimal(row.kitchen / divisor, 1, 3)}">0</td>
+                                    <td th:text="${#numbers.formatDecimal(row.laundry / divisor, 1, 3)}">0</td>
+                                    <td th:text="${#numbers.formatDecimal(row.heating / divisor, 1, 3)}">0</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(results)}"><td colspan="5" class="empty-table">No measurements for these filters.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="report-disclaimer" th:if="${type.name() == 'SUM'}">SUM values represent the sum of submeter readings, converted from Wh to kWh.</p>
+                    <p class="report-disclaimer" th:if="${type.name() == 'AVG'}">AVG values represent average Wh per valid measurement; summary cards use weighted averages across all readings.</p>
+                </div>
+            </section>
+        </main>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+</body>
+</html>

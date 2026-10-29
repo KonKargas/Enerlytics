@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <footer class="app-footer" th:fragment="footer">
+
+        <span>
+            © <span th:text="${#dates.year(#dates.createNow())}">2026</span>
+            Enerlytics
+        </span>
+
+        <span class="footer-separator">•</span>
+
+        <span>
+            Designed &amp; developed by
+            <a href="https://kkargas.com"
+               class="footer-author"
+               target="_blank"
+               rel="noopener noreferrer">
+                Konstantinos Kargas
+            </a>
+        </span>
+
+    </footer>
+
+</body>
+</html>

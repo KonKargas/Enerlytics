@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="sidebar" th:fragment="sidebar(activePage)">
+
+        <a th:href="@{/dashboard}" class="brand">
+            <img class="brand-logo"
+		     th:src="@{/images/logo.png}"
+		     alt="Enerlytics Logo">
+	         
+	         <div class="brand-text">
+		        Ener<span>lytics</span>
+		         <small>ENERGY INTELLIGENCE</small>
+		    </div>
+        </a>
+
+        <div class="sidebar-content">
+
+            <div class="navigation-label">WORKSPACE</div>
+
+            <nav class="navigation">
+
+                <a th:href="@{/dashboard}"
+                   class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a th:href="@{/analytics}" class="nav-item"
+                   th:classappend="${activePage == 'analytics'} ? 'active' : ''">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Analytics</span>
+                </a>
+
+                <a th:href="@{/datasets}" class="nav-item"
+                   th:classappend="${activePage == 'datasets'} ? 'active' : ''">
+                    <i class="bi bi-database"></i>
+                    <span>Datasets</span>
+                </a>
+
+                <a th:href="@{/reports}" class="nav-item"
+                   th:classappend="${activePage == 'reports'} ? 'active' : ''">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Reports</span>
+                </a>
+
+            </nav>
+
+            <div class="navigation-label tools-label">
+                SYSTEM
+            </div>
+
+            <nav class="navigation">
+
+                <a th:href="@{/etl}" class="nav-item"
+                   th:classappend="${activePage == 'etl'} ? 'active' : ''">
+                    <i class="bi bi-arrow-left-right"></i>
+                    <span>ETL Pipeline</span>
+                </a>
+
+                <a th:href="@{/settings}" class="nav-item"
+                   th:classappend="${activePage == 'settings'} ? 'active' : ''">
+                    <i class="bi bi-gear"></i>
+                    <span>Settings</span>
+                </a>
+
+            </nav>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="system-indicator">
+                <span class="status-dot"></span>
+                <span>Local Database</span>
+            </div>
+
+            <p>Enerlytics v1.0</p>
+        </div>
+
+    </aside>
+</body>
+</html>
