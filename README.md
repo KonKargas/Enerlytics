@@ -1,13 +1,21 @@
 <div align="center">
 
-<!-- LOGO: Replace the path below with the actual logo filename from src/main/resources/static/images/ if different. -->
 <img src="src/main/resources/static/images/logo.png" alt="Enerlytics Logo" width="240" />
 
 # Enerlytics
 
 ### Energy Consumption Analytics & ETL Platform
 
-**Java 21 · Spring Boot 4.1.1 · Thymeleaf · SQLite · Chart.js · Maven**
+**Explore energy data. Understand consumption. Turn measurements into insights.**
+
+<p>
+  <img src="https://img.shields.io/badge/Java-21%2B-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java 21+" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot 4.1.1" />
+  <img src="https://img.shields.io/badge/Frontend-Thymeleaf-005F0F?style=flat-square&logo=thymeleaf&logoColor=white" alt="Thymeleaf" />
+  <img src="https://img.shields.io/badge/Database-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/Charts-Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white" alt="Chart.js" />
+  <img src="https://img.shields.io/badge/Build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven" />
+</p>
 
 A locally hosted platform for exploring household electricity data, processing large datasets, visualizing consumption patterns, and exporting analytical reports.
 
@@ -40,7 +48,7 @@ The application is designed for **local or trusted environments**, with SQLite s
 
 Enerlytics supports the **UCI Individual Household Electric Power Consumption** dataset, covering observations from December 2006 to November 2010. The original dataset contains approximately **2,049,280 records**.
 
-### Supported measurements
+### Supported Measurements
 
 - Global active and reactive power
 - Voltage and global intensity
@@ -145,14 +153,14 @@ Local application preferences.
 - Internet access during the initial Maven dependency download
 - A compatible household electricity dataset to import
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/KonKargas/Enerlytics.git
 cd Enerlytics
 ```
 
-### 2. Run the application
+### 2. Run the Application
 
 **Windows:**
 
